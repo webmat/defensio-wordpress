@@ -74,7 +74,7 @@ function defensio_render_header_form($v) {
 	else
 		$hide_obvious_checked = "";	
 
-	$current_sort = defensio_current_sorting();
+	$current_sort = defensio_current_sorting($v);
 	$sort_by_spaminess_link = htmlspecialchars(add_query_arg('sort_by', 'spaminess'));
 	$sort_by_post_date_link = htmlspecialchars(add_query_arg('sort_by', 'post_date'));
 	$sort_by_comment_date_link = htmlspecialchars(add_query_arg('sort_by', 'comment_date'));

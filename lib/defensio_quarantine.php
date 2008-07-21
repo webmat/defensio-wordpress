@@ -7,8 +7,9 @@ function defensio_page_count($total_items, $items_per_page) {
 	return ceil(floatval($total_items) / floatval($items_per_page));
 }
 
-function defensio_current_sorting() {
-	$sort=strtolower($_GET['sort_by']);
+function defensio_current_sorting($v) {
+	$sort = strtolower($v['order']);
+
 	if ($sort == '' || $sort == 'spaminess')
 		return "spaminess";
 	else
