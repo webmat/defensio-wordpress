@@ -194,10 +194,10 @@ function defensio_render_comment($comment) {
                         </span><br />
                       <?php
 				if ($comment->comment_author_email != '') {
-					echo '<a href="mailto:' . $comment->comment_author_email . '">' . $comment->comment_author_email . '</a>';
+					echo '<a href="mailto:' . $comment->comment_author_email . '">' . $comment->comment_author_email . '</a>' ;
 				}
 				if($comment->comment_author_url && $comment->comment_author_url != 'http://' ) { 
-					echo "<a class=\"defensio_author_url\" href=\"" . $comment->comment_author_url . "\">" . $comment->comment_author_url . "</a>";
+					echo " | <a class=\"defensio_author_url\" href=\"" . $comment->comment_author_url . "\">" . $comment->comment_author_url . "</a>";
 				}
 ?>
 		</p>

@@ -155,6 +155,7 @@ p.defensio_comment_header img{
 
 p.defensio_comment_header {
   margin-top: 0px;
+  font-size: 11px;
 }
 
 div.defensio_comment_checkbox{
