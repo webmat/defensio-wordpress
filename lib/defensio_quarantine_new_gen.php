@@ -1,33 +1,32 @@
 <?php
 
-function defensio_render_js_event_manger(){
-	?>
-<script>
-$$('.select-all').each(function(elm){elm.observe('click', SelectAll)} );
-$$('.empty-quarantine').each(function(elm){elm.observe('click', EmptyQuarantine)} );
+function defensio_render_js_event_manger() {
+?>
+  <script>
+  $$('.select-all').each(function(elm){elm.observe('click', SelectAll)} );
+  $$('.empty-quarantine').each(function(elm){elm.observe('click', EmptyQuarantine)} );
 
-var  select_all_clicks = -1;
-function SelectAll(evt) {
-	select_all_clicks ++;
-	$$('.defensio_comment_checkbox').each(function(chbx, index){
-		if(select_all_clicks %2 == 0)
-			chbx.checked = true;
-		else
-			chbx.checked = false;
-	})
-		Event.stop(evt);
-}
+  var  select_all_clicks = -1;
+  function SelectAll(evt) {
+  	select_all_clicks ++;
+  	$$('.defensio_comment_checkbox').each(function(chbx, index){
+  		if(select_all_clicks %2 == 0)
+  			chbx.checked = true;
+  		else
+  			chbx.checked = false;
+  	})
+  		Event.stop(evt);
+  }
 
-function  EmptyQuarantine(evt){
-	if(confirm('You are about to delete all the spam comments from your quarantine.  Are you sure?')){
-        // Here we go
-		}else{
-		Event.stop(evt);
-		}
-}
-
-</script>
-	<?php
+  function EmptyQuarantine(evt){
+  	if(confirm('You are about to delete all the spam comments from your quarantine.  Are you sure?')){
+      // Do it
+  		} else {
+  		Event.stop(evt);
+  		}
+  }
+  </script>
+<?php
 }
 
 function defensio_render_quarantine_html($v) { 
@@ -37,28 +36,26 @@ function defensio_render_quarantine_html($v) {
 		<?php defensio_render_header_form($v); ?>
  		<?php defensio_render_view_switch($v); ?>
 		<form method="post">
-		<?php defensio_render_navigation_bar($v); ?>
-		<?php 
-		if($v['spam_count'] > 0):
-			defensio_render_spam_list($v); 
-		else:
-	?>
-	<br />
-	<p id="defensio_quarantine_empty"> 
-<?php
-		if($v['type_filter'] == 'trackbacks')
-			echo "Your quarantine doesn't contain any spam pingbacks or trackbacks." ;
-		elseif($v['type_filter'] == 'comments')
-			echo "Your quarantine doesn't contain any spam comments." ;
-		else 
-			echo "Your quarantine doesn't contain any spam." ;
+  		<?php defensio_render_navigation_bar($v); ?>
+  		<?php 
+  		if($v['spam_count'] > 0):
+  			defensio_render_spam_list($v); 
+  		else: ?>
+  	    <br />
+  	    <p id="defensio_quarantine_empty"> 
+          <?php if($v['type_filter'] == 'trackbacks')
+  			    echo "Your quarantine doesn't contain any spam pingbacks or trackbacks.";
+  		    elseif($v['type_filter'] == 'comments')
+  			    echo "Your quarantine doesn't contain any spam comments.";
+  		    else 
+  			    echo "Your quarantine doesn't contain any spam.";
 
-		if($v['spaminess_filter'] and isset($v['obvious_spam_count']) and $v['obvious_spam_count'] > 0)
-			echo " However, you are hiding " . $v['obvious_spam_count'] . " obvious spam messages.";
-?>
-   </p>
-		<?php endif;?>
-		<?php defensio_render_navigation_bar($v); ?>
+  		    if($v['spaminess_filter'] and isset($v['obvious_spam_count']) and $v['obvious_spam_count'] > 0)
+  			    echo " However, you are hiding " . $v['obvious_spam_count'] . " obvious spam messages.";
+          ?>
+        </p>
+  		<?php endif;?>
+  		<?php defensio_render_navigation_bar($v); ?>
 		</form>
 		<br class="clear" /><br class="clear" />
 		<?php defensio_render_stats($v); ?>
@@ -81,7 +78,6 @@ function defensio_render_header_form($v) {
 	$sort_by_spaminess_class = ($current_sort == 'spaminess' ? "current" : "");
 	$sort_by_post_date_class = ($current_sort == 'post_date' ? "current" : "");
 	$sort_by_comment_date_class = ($current_sort == 'comment_date' ? "current" : "");
-	
 ?>
 	<form id="posts-filter" method="post">
 		<h2>Defensio Spam</h2>
@@ -121,9 +117,8 @@ function defensio_render_navigation_bar($v) { ?>
 			<input type="submit" class="button-secondary" name="defensio_restore" value="Restore" />
 			<input type="submit" class="button-secondary" name="defensio_delete" value="Delete" />
 			<input type="submit" class="button-secondary empty-quarantine" name="defensio_empty_quarantine" value="Empty Quarantine" />
-                </div>
+		</div>
 
-		
 		<br class="clear" />
 	</div>
 <?php }
@@ -184,29 +179,27 @@ function defensio_render_comment($comment) {
 		<div class="defensio_comment_checkbox">
 			<input type="checkbox" name="<?php echo $checkbox_id; ?>" id="<?php echo $checkbox_id; ?>" class="defensio_comment_checkbox" />
 		</div>
-		
-                <p class="defensio_comment_header comment-author" style="margin:0">
-                    <span class="row-title">
-			<?php 
-			echo(get_avatar($comment, 32));
-                        echo( "<strong>" .  $comment->comment_author . "</strong>");
-                        ?>
-                        </span><br />
-                      <?php
-				if ($comment->comment_author_email != '') {
-					echo '<a href="mailto:' . $comment->comment_author_email . '">' . $comment->comment_author_email . '</a>';
-				}
-				if($comment->comment_author_url && $comment->comment_author_url != 'http://' ) { 
-					echo "<a class=\"defensio_author_url\" href=\"" . $comment->comment_author_url . "\">" . $comment->comment_author_url . "</a>";
-				}
+
+		<p class="defensio_comment_header comment-author" style="margin:0">
+			<span class="row-title">
+				<?php 
+				echo(get_avatar($comment, 32));
+				echo( "<strong>" .  $comment->comment_author . "</strong>");
+				?>
+			</span><br />
+			<?php
+			if ($comment->comment_author_email != '') {
+				echo '<a href="mailto:' . $comment->comment_author_email . '">' . $comment->comment_author_email . '</a>';
+			}
+			if($comment->comment_author_url && $comment->comment_author_url != 'http://' ) { 
+				echo "<a class=\"defensio_author_url\" href=\"" . $comment->comment_author_url . "\">" . $comment->comment_author_url . "</a>";
+			}
 ?>
 		</p>
 
 		<p class="defensio_body_shrunk" id="<?php echo $body_id; ?>">
 			<?php echo nl2br($comment->comment_content) ?>
 		</p>
-		
-		
 		
 		<p class="defensio_comment_meta">
 			<a class="defensio_quarantine_action" id="defensio_view_full_comment_<?php echo $comment->id?>" href="#" onclick="javascript:defensio_toggle_height('<?php echo $comment->id?>');return false;">View full comment</a> | 
@@ -297,7 +290,6 @@ if($v['stats'] and $v['authenticated']) :
 <?php 
 	else:
 ?>
-
 		<p>Statistics could not be retrieved, please check back later.</p>
 <?php
 	 endif;

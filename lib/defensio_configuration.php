@@ -10,7 +10,7 @@ function defensio_render_configuration_html($v) {
 	if(!is_wp_version_supported()) {
 ?>
 		<h3>Unsupported version</h3>
-		<p> We are sorry, Defensio can only be installed on WordPress 2.1 or newer. We encourage you to <a href="http://wordpress.org/download/">upgrade</a> to enjoy a spam free blogging experience with Defensio.</p>
+		<p>We are sorry, Defensio can only be installed on WordPress 2.1 or newer. We encourage you to <a href="http://wordpress.org/download/">upgrade</a> to enjoy a spam free blogging experience with Defensio.</p>
 <?php
 	} else {
 ?>
@@ -71,8 +71,7 @@ function defensio_render_key_validity($v) {
 	$explanation  =  defensio_post_error_code_to_string($v['defensio_post_error_code']);
 
 ?>
-    	<p style="padding: .5em; background-color: #d22; color: #fff; font-weight: bold;"> <?php echo ucfirst($explanation) ?></p>
-
+		<p style="padding: .5em; background-color: #d22; color: #fff; font-weight: bold;"> <?php echo ucfirst($explanation) ?></p>
 <?php
 		}
 	}
@@ -85,14 +84,14 @@ function defensio_post_error_code_to_string($code) {
 	// Codes greater than 100, http codes, if not 401 or 200 
         // that is unexpected
 	} elseif ($code >= 100) {
-		 return 'unexpected HTTP code';
-        // Snoopy returns -100 on timeout
-        // no timeout creting the socket
+		 return 'Unexpected HTTP code';
+		
+		// Snoopy returns -100 on timeout, no timeout creating the socket
 	} elseif ($code == -100){
-		return "timeout connecting to defensio's servers";
+		return "Timeout when connecting to Defensio server";
         // The rest should be socket errors
 	} else {
-		return "couldn't open a external connection, check your configuration or contact your hosting provider";
+		return "Couldn't open a external connection, check your configuration or contact your hosting provider.";
 	}
 }
 
