@@ -219,6 +219,13 @@ p#defensio_quarantine_empty {
   clear: both;
   text-align:center;
 }
+
+span.defensio_more_details a {
+  color: #cccccc;
+  font-size: 7pt;
+  text-decoration: none;
+}
+
 </style>
 
 <?php } ?>
