@@ -207,7 +207,7 @@ function defensio_render_comment($comment) {
 			<?php echo($comment->comment_date) . " | " ?>
 			Post: <a href="<?php echo get_permalink($comment->comment_post_ID); ?>" title="<?php echo $omment->post_title; ?>"><?php echo $comment->post_title; ?></a>
 			<span id="defensio_more_details_<?php echo $comment->id?>" class="defensio_more_details">
-			  <a href="#" onclick="javascript:$('defensio_more_details_<?php echo $comment->id?>').removeClassName('defensio_more_details').update(' | Signature: <?php echo $comment->signature?>');">+</a>
+			  <a href="#" onclick="javascript:$('defensio_more_details_<?php echo $comment->id?>').removeClassName('defensio_more_details').update(' | Signature: <?php echo $comment->signature?>');return false;">+</a>
 			</span>
 
 		</p>
