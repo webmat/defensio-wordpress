@@ -18,14 +18,13 @@ include_once('lib/defensio_moderation.php');
 
 
 $defensio_conf = array(
-	'server'       => 'api.defensio.com',
+	'server'       => 'localhost:4000',
 	'path'         => 'blog',
 	'api-version'  => '1.2',
 	'format'       => 'yaml',
 	'blog'         => get_option('home'),
 	'post_timeout' => 10
 );
-
 
 
 /* If you want to hard code the key for some reason, uncomment the following line and replace 1234567890 with your key. */
@@ -603,21 +602,28 @@ function defensio_is_openid_enabled(){
 	return function_exists('is_user_openid');
 }
 
+// Receives an associative array representing
+// a comment before it has been sent defensio,
+// returns the comment with the appropiate 
+// opeind related values.
+//
+// If there is not OpenID enabled or the user 
+// is not logged in using OpenID returns exactly 
+// the same comment.
 function defensio_get_openid($com){
-	global $wpdb,  $openid;
+	global $wpdb;
         
 	if (!defensio_is_openid_enabled())
 		return $com;
 
 	if (is_user_openid()){
-		// Add the last identity to defensio params
-		$identity = $openid->logic->store->get_my_identities(null);
+		$identity = get_user_openids(null);
 		if(is_array($identity)) {
 			$identity = @array_pop($identity);
 		}
 		$com['openid'] = $identity['url'];
-	} elseif($openid->logic->finish_openid_auth()) {
-		$com['openid'] = $openid->logic->finish_openid_auth();
+	} elseif(finish_openid_auth()) {
+		$com['openid'] = finish_openid_auth();
 		// Not really logged in but a valid openid
 		$com['user-logged-in'] = 'true';
 	}
