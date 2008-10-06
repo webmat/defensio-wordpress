@@ -632,7 +632,7 @@ function defensio_get_openid($com){
 
 function defensio_check_comment($com, $incoming = true, $retrying = false) {
 	global $wpdb, $defensio_conf, $defensio_meta, $userdata, $acts_as_master;
-	
+
 	$comment = array();
 
 	/* If it is an incoming message (not yet in the database).
