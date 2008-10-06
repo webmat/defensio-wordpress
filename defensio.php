@@ -18,7 +18,7 @@ include_once('lib/defensio_moderation.php');
 
 
 $defensio_conf = array(
-	'server'       => 'localhost:4000',
+	'server'       => 'api.defensio.com',
 	'path'         => 'blog',
 	'api-version'  => '1.2',
 	'format'       => 'yaml',
