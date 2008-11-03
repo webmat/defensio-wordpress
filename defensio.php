@@ -102,7 +102,7 @@ function defensio_init() {
 	// In case the table is deleted create it again
 	defensio_create_table(); 
 
-        // Are there any unproccessed comments?
+	// Are there any unproccessed comments?
 	$defensio_unprocessed_count= defensio_get_unprocessed_comments();
 	if (count($defensio_unprocessed_count) > 0) {
 		add_action( 'admin_print_scripts', 'defensio_admin_head' );
@@ -651,11 +651,7 @@ function defensio_check_comment($com, $incoming = true, $retrying = false) {
 
 	if ($userdata->ID) {
 		$comment['user-logged-in'] = 'true';
-                
-                // Patch from Peter  (pdoes) beeter way of getting 
-                // user's capabilities
-                $caps = get_usermeta( $userdata->ID, $wpdb->prefix . 'capabilities');
-
+		$caps = get_usermeta( $userdata->ID, $wpdb->prefix . 'capabilities');
 		if (defensio_is_trusted_user($caps)) {
 			$comment['trusted-user'] = 'true';
 		}
@@ -686,7 +682,7 @@ function defensio_check_comment($com, $incoming = true, $retrying = false) {
 	$comment['user_ID'] = $com['user_ID'];
 	$comment = defensio_get_openid($comment);
 	unset( $comment['user_ID']);
-        $err_code = NULL;
+	$err_code = NULL;
 
 	if ($r = defensio_post('audit-comment', $comment, $err_code)) {
 		$ar = Spyc :: YAMLLoad($r);
@@ -919,7 +915,6 @@ function defensio_url_for($action, $key = null) {
 
 function defensio_empty_quarantine() {
 	global $wpdb;
-
 	$wpdb->query("DELETE $wpdb->prefix"."defensio.* FROM  $wpdb->prefix"."defensio NATURAL JOIN $wpdb->comments WHERE comment_approved = 'spam'");
 	$wpdb->query("DELETE FROM $wpdb->comments WHERE comment_approved = 'spam'");
 }
