@@ -1,3 +1,10 @@
+/* Default defensio style
+ *
+ * style tweaks should be added in separate style sheets
+ * for a given  WP version
+ *
+ *  */
+
 ul.defensio_comments {
   list-style: none;
   padding: 0;
@@ -5,29 +12,29 @@ ul.defensio_comments {
 	margin-bottom: 2px;
 }
 
-tr {
+ul.defensio_comments li {
   padding: 1px 0 1px 0;
   margin: 2px 0 2px 0;
 }
 
-tr.defensio_check_all {
+ul.defensio_comments li.defensio_check_all {
 	margin: 15px 0 5px 5px;
 }
 
-
-tr.defensio_comment_group {
-  background-color: #f8f8f8;
+ul.defensio_comments ul.defensio_comment_group {
+  list-style: none;
+  padding: 0;
 }
 
-tr.defensio_comment_group td {
-  font-size: 9pt;
+ul.defensio_comments ul.defensio_comment_group li.defensio_post_title {
+  font-size: 12pt;
   font-weight: bold;
-  padding: 7px 0 7px 10px;
-
+  padding: 10px 0 7px 10px;
+  background-color: #e1e1e1;
 }
 
-tr.defensio_comment_group span {
-  font-size: 7pt;
+ul.defensio_comments ul.defensio_comment_group li.defensio_post_title span {
+  font-size: 8pt;
   font-weight: normal;
 }
 
@@ -40,7 +47,7 @@ p.hide_obvious_spam {
 }
 
 
-tr li {
+ul.defensio_comments li li {
 	padding: 8px;
 }
 
@@ -48,21 +55,23 @@ ul.defensio_comments p {
   margin: 5px 5px 5px 20px;
 }
 
-tr td p.defensio_body_shrunk {
-  height: 4em;
+ul.defensio_comments li p.defensio_body_shrunk {
+  height: 17px;
   margin-bottom: 10px;
   overflow: hidden;
+  font-size: 9pt;
 }
 
-tr td p.defensio_body_expanded {
-  margin-bottom: 39px;  
+ul.defensio_comments li p.defensio_body_expanded {
+  margin-bottom: 10px;
+  font-size: 9pt;    
 }
 
-tr span.defensio_comment_header {
+ul.defensio_comments li span.defensio_comment_header {
   font-weight: bold;
 }
 
-tr p.defensio_comment_meta {
+ul.defensio_comments li p.defensio_comment_meta {
   filter:alpha(opacity=75);
   -moz-opacity:.75;
   opacity:.75;
@@ -73,44 +82,44 @@ li p.defensio_comment_meta a.defensio_quarantine_action {
   font-weight: bold;
 }
 
-tr.defensio_spam0 {
+ul.defensio_comments li.defensio_spam0 {
   background-color: #ffffff;
   border-bottom: 1px solid #ccc;
 }
 
-tr.defensio_spam1 {
+ul.defensio_comments li.defensio_spam1 {
   background-color: #faf0e1;
 }
 
-tr.defensio_spam2 {
+ul.defensio_comments li.defensio_spam2 {
   background-color: #faebd4;
 }
 
-tr.defensio_spam3 {
+ul.defensio_comments li.defensio_spam3 {
   background-color: #fae6c8;
 }
 
-tr.defensio_spam4 {
+ul.defensio_comments li.defensio_spam4 {
   background-color: #fae1bb;
 }
 
-tr.defensio_spam5 {
+ul.defensio_comments li.defensio_spam5 {
   background-color: #fadcaf;
 }
 
-tr.defensio_spam6 {
+ul.defensio_comments li.defensio_spam6 {
   background-color: #fad7a2;
 }
 
-tr.defensio_spam7 {
+ul.defensio_comments li.defensio_spam7 {
   background-color: #fad296;
 }
 
-tr.defensio_spam8 {
+ul.defensio_comments li.defensio_spam8 {
   background-color: #facd89;
 }
 
-tr.defensio_spam9 {
+ul.defensio_comments li.defensio_spam9 {
   background-color: #fac87d;
 }
 
@@ -215,9 +224,9 @@ p#defensio_quarantine_empty {
 }
 
 span.defensio_more_details a {
-/*  color: #cccccc;*/
-/*  font-size: 7pt;*/
-/*  text-decoration: none;*/
+  color: #cccccc;
+  font-size: 7pt;
+  text-decoration: none;
 }
 
 /* For warning boxes */

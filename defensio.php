@@ -110,12 +110,14 @@ function defensio_init() {
 
 	// Enquque styles for 2.6 +
 	if ((float)$wp_version >= 2.6){
-		wp_enqueue_style('defensio','/wp-content/plugins/defensio-anti-spam/styles/defensio.css' );
-		wp_enqueue_style('defensio_'. (float)$wp_version   ,'/wp-content/plugins/defensio-anti-spam/styles/defensio_' . (float)$wp_version . '.css' );
+		if((float)$wp_version >= 2.7){
+			wp_enqueue_style('defensio','/wp-content/plugins/defensio-anti-spam/styles/defensio_2.7.css' );
+		}else{
+			wp_enqueue_style('defensio' ,'/wp-content/plugins/defensio-anti-spam/styles/defensio.css' );
+		}
 	}else{
 		//Here for older versions
 		add_action('admin_head', create_function('$a', 'echo "<link media=\"all\" type=\"text/css\" href=\"'. get_option('siteurl')  .'/wp-content/plugins/defensio-anti-spam/styles/defensio.css\" rel=\"stylesheet\"> </link>" ;'));
-		add_action('admin_head', create_function('$a', 'echo "<link media=\"all\" type=\"text/css\" href=\"'. get_option('siteurl')  .'/wp-content/plugins/defensio-anti-spam/styles/original_stylesheet.css\" rel=\"stylesheet\"> </link>" ;'));
 	}	
 }
 add_action('init', 'defensio_init');
