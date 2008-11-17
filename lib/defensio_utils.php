@@ -44,8 +44,14 @@ function is_wp_version_supported() {
 
 // Returns the appropriate defensio_warning style based on the current WordPress version
 function defensio_warning_style() {
+	global $wp_version;
+
 	$old_style = "#defensio_warning { position: absolute; top: 7em; }";
-	$new_style = "#defensio_warning { position: absolute; top: 11.5em; }";
+	
+	$new_style = "";
+	
+	if((float)$wp_version < 2.7)
+		$new_style = "#defensio_warning { position: absolute; top: 11.5em; }";
 
 	if (!is_new_gen_wordpress())
 		return $old_style;

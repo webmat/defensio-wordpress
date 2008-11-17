@@ -6,7 +6,7 @@
   Version: 1.6.1
   Author: Karabunga, Inc
   Author URI: http://karabunga.com/
- */
+*/
 
 include_once('lib/spyc.php');
 include_once('lib/defensio_utils.php');
@@ -18,14 +18,13 @@ include_once('lib/defensio_moderation.php');
 
 
 $defensio_conf = array(
-	'server'       => 'api.defensio.com',
+	'server'       => 'localhost:4000',
 	'path'         => 'blog',
 	'api-version'  => '1.2',
 	'format'       => 'yaml',
 	'blog'         => get_option('home'),
 	'post_timeout' => 10
 );
-
 
 /* If you want to hard code the key for some reason, uncomment the following line and replace 1234567890 with your key. */
 // $defensio_conf['key'] = '1234567890'; 
@@ -89,7 +88,7 @@ function defensio_create_table() {
 
 // Init hook
 function defensio_init() {
-	global $defensio_conf, $defensio_unprocessed_count;
+	global $defensio_conf, $defensio_unprocessed_count, $wp_version;
 	add_action('admin_menu', 'defensio_config_page');
 
 	if (isset ($defensio_conf['key'])) {
@@ -103,11 +102,21 @@ function defensio_init() {
 	defensio_create_table(); 
 
 	// Are there any unproccessed comments?
-	$defensio_unprocessed_count= defensio_get_unprocessed_comments();
+	$defensio_unprocessed_count = defensio_get_unprocessed_comments();
 	if (count($defensio_unprocessed_count) > 0) {
-		add_action( 'admin_print_scripts', 'defensio_admin_head' );
-		add_action('admin_footer', 'defensio_unprocessed_warning');
+		add_action('admin_print_scripts', 'defensio_admin_head');
+		add_action('admin_notices', 'defensio_unprocessed_warning');
 	}
+
+	// Enquque styles for 2.6 +
+	if ((float)$wp_version >= 2.6){
+		wp_enqueue_style('defensio','/wp-content/plugins/defensio-anti-spam/styles/defensio.css' );
+		wp_enqueue_style('defensio_'. (float)$wp_version   ,'/wp-content/plugins/defensio-anti-spam/styles/defensio_' . (float)$wp_version . '.css' );
+	}else{
+		//Here for older versions
+		add_action('admin_head', create_function('$a', 'echo "<link media=\"all\" type=\"text/css\" href=\"'. get_option('siteurl')  .'/wp-content/plugins/defensio-anti-spam/styles/defensio.css\" rel=\"stylesheet\"> </link>" ;'));
+		add_action('admin_head', create_function('$a', 'echo "<link media=\"all\" type=\"text/css\" href=\"'. get_option('siteurl')  .'/wp-content/plugins/defensio-anti-spam/styles/original_stylesheet.css\" rel=\"stylesheet\"> </link>" ;'));
+	}	
 }
 add_action('init', 'defensio_init');
 
@@ -116,13 +125,15 @@ function defensio_key_not_set_warning() {
 	global $defensio_conf, $wp_version;
 	
 	if (!isset($defensio_conf['key']) or empty($defensio_conf['key'])) {
-		defensio_render_warning_styles();
+		// No need in 2.7
+		if((float) $wp_version < 2.7)
+			defensio_render_warning_styles();
 		echo "<div id='defensio_warning' class='updated fade'>" .
 		"<p><strong>Defensio is not active</strong> because you have not entered your Defensio API key.  <a href='http://defensio.com/signup' target='_blank'>Get one right here!</a></p></div>";
 	}
 	return; 
 }
-add_action('admin_footer', 'defensio_key_not_set_warning');
+add_action('admin_notices', 'defensio_key_not_set_warning');
 
 
 function defensio_unprocessed_warning() {
@@ -176,18 +187,18 @@ function defensio_configuration() {
 	
 	$key = NULL;
 	$err_code = NULL;
-
+	
 	if (isset($_POST['new_key'])) {
 		check_admin_referer( $defensio_conf['nonce']);
 		$key = trim($_POST['new_key']);
 		$key = defensio_sql_escape($key);
-		update_option('defensio_key', $key);
 		$defensio_conf['key'] = $key;
 	}
 
 	if (isset($defensio_conf['key'])) {
 		if (defensio_verify_key($defensio_conf['key'], $err_code)) {
 			$valid = true;
+			update_option('defensio_key', $defensio_conf['key']);
 		} else {
 			$valid = false;
 		}
@@ -298,18 +309,17 @@ function defensio_update_db($opts = null){
 
 	// Many messages to process
 	if (isset ($opts['defensio_comments'])) {
-
 		// Restore
 		if (isset ($opts['defensio_restore'])) {
-			foreach ($opts['defensio_comments'] as $k => $v) {		  
-				$id = (int)$k;
+			foreach ($opts['defensio_comments'] as $id ) {		  
+				$id = (int)$id;
 				defensio_set_status_approved($id);
 			}
 		}
 
 		// Delete
 		if (isset ($opts['defensio_delete'])) {
-			foreach ($opts['defensio_comments'] as $k => $v) {
+			foreach ($opts['defensio_comments'] as $k ) {
 				$k = (int) $k;
 				$wpdb->query("DELETE from $wpdb->prefix" . "defensio WHERE comment_ID = $k");
 				$wpdb->query("DELETE from $wpdb->comments WHERE comment_ID = $k");
@@ -374,12 +384,13 @@ function defensio_caught( $opts = null ) {
 	}
 	
 	$sql_order = defensio_sort_by_to_sql($order);
+	
         
 	// Hide obvious spam
 	if (isset($opts['hide_obvious_spam_toggle'])) {
 		$opt_name = defensio_user_unique_option_key('hide_more_than_threshold');
 
-		if (isset($opts['hide_obvious_spam'])) 
+		if (isset($opts['hide_obvious_spam']))
 			update_option($opt_name, '1');
 		else
 			update_option($opt_name, '0');
@@ -444,7 +455,7 @@ function defensio_caught( $opts = null ) {
 		'items_per_page'    => $opts['items_per_page'],
 		'order'             => $order_param,
 		'search_query'      => $query_param,
-		'spaminess_filter'  => get_option(defensio_user_unique_option_key('hide_more_than_threshold')),
+		'spaminess_filter'  => get_option(defensio_user_unique_option_key('hide_more_than_threshold')),	
 		'nonce'             => $defensio_conf['nonce'],
 		'stats'             => defensio_get_stats(),
 		'obvious_spam_count' => defensio_obvious_spam_count(),
@@ -455,21 +466,30 @@ function defensio_caught( $opts = null ) {
 }
 
 function defensio_dispatch(){
-	global $wpdb, $defensio_conf, $defensio_retraining;
+	global $wpdb, $defensio_conf, $defensio_retraining, $wp_version;
 	 
-	defensio_user_unique_option_key('a');
-
 	if (function_exists('current_user_can') && !current_user_can('moderate_comments')) {
 		die(__('You do not have sufficient permission to moderate comments.'));
 	}
 
-	/* Perform requested actions*/
-	$db_req = array( 
-			'defensio_comments' => $_POST['defensio_comments'],  
-			'defensio_empty_quarantine' =>  $_POST['defensio_empty_quarantine'],  
-			'defensio_restore' =>  $_POST['defensio_restore'],  
-			'defensio_delete' =>  $_POST['defensio_delete'] 
-			);
+	// Perform requested actions old versions
+	if($wp_version < 2.7){
+		$db_req = array( 
+				'defensio_comments' => $_POST['defensio_comments'],  
+				'defensio_empty_quarantine' =>  $_POST['defensio_empty_quarantine'],  
+				'defensio_restore' =>  $_POST['defensio_restore'],  
+				'defensio_delete' =>  $_POST['defensio_delete'] 
+				);
+	
+	// Perform requested actions 2.7
+	}else{
+		$db_req = array( 
+				'defensio_comments'         => $_POST['delete_comments'],  
+				'defensio_empty_quarantine' => ($_POST['action'] == 'emptyquarantine'||  $_POST['action2'] == 'emptyquarantine')? true : NULL,
+				'defensio_restore'          => ($_POST['action'] == 'restore'        ||  $_POST['action2'] == 'restore'        )? true : NULL ,  
+				'defensio_delete'           => ($_POST['action'] == 'delete'         ||  $_POST['action2'] == 'delete'         ) ? true : NULL
+				);
+	}
 
 	$db_req ['ham'] = $_GET['ham'];
 
@@ -483,12 +503,12 @@ function defensio_dispatch(){
 	$query_opts = array(
 			'items_per_page' => 50,
  			'page' => $_GET['defensio_page'],
-			'sort_by' => $_GET['sort_by'],
-			'hide_obvious_spam_toggle' => $_POST['hide_obvious_spam_toggle'],
-			'hide_obvious_spam' => $_POST['hide_obvious_spam'],
+			'sort_by' => $_REQUEST['sort_by'],
+			'hide_obvious_spam_toggle' => $_REQUEST['hide_obvious_spam_toggle'],
+			'hide_obvious_spam' => $_REQUEST['hide_obvious_spam'],
 			'search' => $_POST['search'],
-			'type' => $_GET['type']
-			);
+			'type' => $_POST['comment_type']
+	);
 
 
 	if(!isset($query_opts['search']))
@@ -496,7 +516,7 @@ function defensio_dispatch(){
 
 	$render_params = defensio_caught($query_opts);
 	
-	/*Render quarantine*/
+	// Render quarantine
 	defensio_render_quarantine_html($render_params);
 }
 
@@ -519,14 +539,14 @@ function defensio_manage_page() {
 add_action('admin_menu', 'defensio_manage_page');
 
 function defensio_admin_head(){
-	global $plugin_uri;
+	global $plugin_uri, $wp_version;
 	wp_enqueue_script('prototype');
 	wp_enqueue_script('fat',  '/wp-content/plugins/defensio-anti-spam/scripts/fat.js');
 	wp_enqueue_script('defensio', '/wp-content/plugins/defensio-anti-spam/scripts/defensio.js');
-	// Defensio's CSS goes here
-	defensio_render_html_head(array('plugin_uri' => $plugin_uri));
+	// 2.7 +
+	wp_enqueue_script('admin-comments');
+	wp_enqueue_script('admin-forms');
 }
-
 
 function defensio_save_meta_data($comment_ID) {
 	global $wpdb, $defensio_meta;
@@ -618,10 +638,11 @@ function defensio_get_openid($com){
 
 	if (is_user_openid()){
 		$identity = get_user_openids(null);
+		// Take the first URL.
 		if(is_array($identity)) {
 			$identity = @array_pop($identity);
 		}
-		$com['openid'] = $identity['url'];
+		$com['openid'] = $identity;
 	} elseif(finish_openid_auth()) {
 		$com['openid'] = finish_openid_auth();
 		// Not really logged in but a valid openid
@@ -788,6 +809,7 @@ function defensio_verify_key($key, &$err_code) {
 }
 
 
+
 function defensio_submit_ham($signatures) {
 	global $wpdb, $defensio_conf;
 
@@ -815,11 +837,13 @@ function defensio_submit_spam($signatures){
 // To train multiple messages at once, we push them into an array and process them in the shutdown hook.
 function defensio_defer_training($id, $new_status = null) {
 	global $deferred_spam_to_ham, $deferred_ham_to_spam, $defensio_retraining, $wpdb;
-  
-	$id = defensio_sql_escape($id);
+	
+	error_log($new_status); 
+	error_log($id); 
+
   
 	// 'approve' should only be retrained when a message is being marked as SPAM
-	if (!(($new_status == 'approve' and $defensio_retraining) or $new_status == 'spam')) {
+	if (!(($new_status == 'approve' and $defensio_retraining) or $new_status == 'spam' or $new_status == null  )) {
 		return;
 	}
 		
@@ -828,7 +852,7 @@ function defensio_defer_training($id, $new_status = null) {
 	if (!$comment) { return; }
 	if (!isset($comment->signature) or empty($comment->signature)) { return; }
 	
-	if ($comment->comment_approved == 'spam') {
+	if ($comment->comment_approved == 'spam' and isset($new_status) ) {
 		// Set new spaminess to 100%, it is spam for sure
 		$wpdb->get_row("UPDATE	$wpdb->prefix" . "defensio SET spaminess = 1 WHERE $wpdb->prefix"."defensio.comment_ID = '$id'");
 
@@ -927,22 +951,31 @@ function defensio_sql_escape($str) {
 
 // To be used with admin-ajax
 function defensio_restore() {
-	global $wpdb;
 	define('DOING_AJAX', true);
-  
 	if (isset ($_POST['ham'])) {
 		$id = (int) $_POST['ham'];
-
-		$comment = $wpdb->get_row("SELECT * FROM $wpdb->comments NATURAL JOIN $wpdb->prefix" . "defensio WHERE $wpdb->comments.comment_ID = '$id'");
-
-		if ($comment) {
-			$wpdb->get_row("UPDATE	$wpdb->prefix" . "defensio SET spaminess = 0 WHERE $wpdb->prefix"."defensio.comment_ID = '$id'");
+		if(isset($id)){
+			//defensio_set_status_approved(get_comment($id));
+			defensio_set_status_approved($id);
 		}
-
-		defensio_set_status_approved($id);
 	} 
 }
+
 add_action('wp_ajax_defensio-restore', 'defensio_restore');
+add_filter('comment_spam_to_approved',  create_function('$comment', 'defensio_set_status_approved($comment->comment_ID);'));
+
+// Sets the spamines value for a comment already in the db
+
+function defensio_set_spaminess($comment_id, $value){
+	global $wpdb;
+	$wpdb->get_row("UPDATE	$wpdb->prefix" . 
+		       "defensio SET spaminess = " . 
+			(string)$value  ." WHERE $wpdb->prefix".
+			"defensio.comment_ID = '$comment_id'"
+			);
+}
+
+
 
 
 function defensio_is_trusted_user($cap) {
@@ -958,8 +991,18 @@ function defensio_is_trusted_user($cap) {
 }
 
 
+function defensio_get_signature($comment_id){
+	global $wpdb, $defensio_conf;
+	return $wpdb->get_var("SELECT signature FROM $wpdb->prefix". "defensio WHERE comment_ID = '$comment_id' LIMIT 1");
+}
+
 function defensio_set_status_approved($id) {
 	global $defensio_retraining;
+	
+	// Human checked.. spaminess => 0 
+	defensio_set_spaminess($id, 0);
+	defensio_submit_ham(defensio_get_signature($id)); 
+
 	$defensio_retraining = true;
 	wp_set_comment_status($id, 'approve');
 	$defensio_retraining = false;
@@ -1121,6 +1164,7 @@ function defensio_render_activity_box() {
 	echo "</p>";
 }
 add_action('activity_box_end', 'defensio_render_activity_box');
+// Try to remplace dashboard link!
 
 // Orphan rows have spaminess -1; they were never filtered by Defensio
 function defensio_clean_up_orphan_rows($id, $status) {
@@ -1159,6 +1203,38 @@ function defensio_sort_by_to_sql($sort_by = null){
 			return ' comment_date DESC, IFNULL(spaminess, 1) ASC ';
 		default:
 			return ' IFNULL(spaminess, 1) ASC, comment_date DESC ' ;
+	}
+}
+
+// Only 2.7
+if ((float)$wp_version >= 2.7 ){
+	add_filter('comment_status_links', 'defensio_replace_default_quarantine_link', 99, 1);
+
+	/* In WP 2.7 there is a built-in  SPAM quarantine. This filter function
+	* will take the array of status links in wp-admin/comments and replace the
+	* link to spam type by a link to defensio's quarantine
+	*/
+	function defensio_replace_default_quarantine_link($status_links){
+		global $wp_version;
+
+		foreach($status_links as $index => $link){
+
+			if(preg_match('/Spam/', $link)){
+				//TODO: Use appropiate constant plugin_name
+				$status_links[$index] = '<a href="edit-comments.php?page=defensio-anti-spam/defensio.php">Defensio Spam ('. defensio_spam_count() . ") </a> ";
+				break;
+			}	
+		}
+		return $status_links;
+	}
+	
+	/* Redirect default quarantine to defensio's. There is no useful hook to cahnge the
+	  link in dashboard.php... just redirect */	
+	add_action('load-edit-comments.php', 'defensio_redirect_to_qurantine');
+
+	function defensio_redirect_to_qurantine($a){
+		if($_REQUEST['comment_status'] == 'spam')
+			wp_redirect("edit-comments.php?page=defensio-anti-spam/defensio.php");
 	}
 }
 
