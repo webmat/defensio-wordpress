@@ -106,8 +106,8 @@ function defensio_render_header_form($v) {
 
 
 function defensio_render_navigation_bar($v) { ?>
+ 	<?php defensio_render_view_switch($v); ?>
 	<div class="tablenav">
- 		<?php defensio_render_view_switch($v); ?>
 		<div class="tablenav-pages">
 			<?php defensio_render_page_navigation_links($v); ?>
 		</div>

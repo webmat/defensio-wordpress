@@ -137,7 +137,6 @@ function defensio_key_not_set_warning() {
 }
 add_action('admin_notices', 'defensio_key_not_set_warning');
 
-
 function defensio_unprocessed_warning() {
 	global $defensio_unprocessed_count;
 	defensio_render_unprocessed_in_moderation($defensio_unprocessed_count);
@@ -186,7 +185,7 @@ function defensio_config_page() {
 
 function defensio_configuration() {
 	global $defensio_conf;
-	
+
 	$key = NULL;
 	$err_code = NULL;
 	
@@ -273,7 +272,7 @@ function defensio_generate_spaminess_filter($reverse = false, $ignore_option = f
 	if (get_option($option_name) == '1' or $ignore_option) {
 		$t = (int)get_option(defensio_user_unique_option_key('threshold'));
 		$t = (float)($t) / 100.0;
-		
+
 		/* if the Defensio table was created using an old version of the plugin, the 
 		   spaminess field was created as a float which is not precise.  for example,
 		   a spaminess of 80% was being stored as 0.80000001, which caused the following
@@ -313,7 +312,7 @@ function defensio_update_db($opts = null){
 	if (isset ($opts['defensio_comments'])) {
 		// Restore
 		if (isset ($opts['defensio_restore'])) {
-			foreach ($opts['defensio_comments'] as $id ) {		  
+			foreach ($opts['defensio_comments'] as $id ) {
 				$id = (int)$id;
 				defensio_set_status_approved($id);
 			}
@@ -358,7 +357,7 @@ function defensio_caught( $opts = null ) {
 
 	// A new ordering requested? update ordering creterion
 	if ( isset($opts['sort_by']) and !empty ($opts['sort_by'])) {
-  		// Order by comment date
+		// Order by comment date
 		if ($opts['sort_by'] == 'comment_date') {
 			$order = 'comment_date';
 
@@ -373,21 +372,21 @@ function defensio_caught( $opts = null ) {
 
 		update_option(defensio_user_unique_option_key('order'), $order);
 	}
-	
+
 	if($order == null){
 		// no request? get the ordering from options.
 		$order = get_option(defensio_user_unique_option_key('order'));
-		
+
 		if($order == null){
 			$order = 'spaminess';
 			update_option(defensio_user_unique_option_key('order'), $order);
 		}
 
 	}
-	
+
 	$sql_order = defensio_sort_by_to_sql($order);
-	
-        
+
+
 	// Hide obvious spam
 	if (isset($opts['hide_obvious_spam_toggle'])) {
 		$opt_name = defensio_user_unique_option_key('hide_more_than_threshold');
@@ -399,7 +398,7 @@ function defensio_caught( $opts = null ) {
 	}
 
 	$spaminess_filter = defensio_generate_spaminess_filter();
-	
+
 	// search
 	$search_query = '';
 	if (isset($opts['search']) and !empty($opts['search'])) {
@@ -469,7 +468,7 @@ function defensio_caught( $opts = null ) {
 
 function defensio_dispatch(){
 	global $wpdb, $defensio_conf, $defensio_retraining, $wp_version;
-	 
+
 	if (function_exists('current_user_can') && !current_user_can('moderate_comments')) {
 		die(__('You do not have sufficient permission to moderate comments.'));
 	}
@@ -482,7 +481,7 @@ function defensio_dispatch(){
 				'defensio_restore' =>  $_POST['defensio_restore'],  
 				'defensio_delete' =>  $_POST['defensio_delete'] 
 				);
-	
+
 	// Perform requested actions 2.7
 	}else{
 		$db_req = array( 
@@ -501,7 +500,7 @@ function defensio_dispatch(){
 	defensio_update_db($db_req);
 
 	/* Query for comments */
-	
+
 	$query_opts = array(
 			'items_per_page' => 50,
  			'page' => $_GET['defensio_page'],
@@ -517,7 +516,7 @@ function defensio_dispatch(){
 		$query_opts['search'] = $_GET['search'];
 
 	$render_params = defensio_caught($query_opts);
-	
+
 	// Render quarantine
 	defensio_render_quarantine_html($render_params);
 }
@@ -594,18 +593,17 @@ function defensio_update_meta_data($comment_ID) {
 // get stats from cache, or from server is cache is invalidated
 function defensio_get_stats() {
 	$stats = wp_cache_get('stats', 'defensio');
-  
+
 	if (!$stats) { 
 		$stats = defensio_refresh_stats();
 		wp_cache_set('stats' , $stats, 'defensio', 600);
 	}
-	
+
 	return $stats;
 }
-	
-	
+
 // refresh stats from server
-function defensio_refresh_stats() {	
+function defensio_refresh_stats() {
 	global $defensio_conf;
 	$err_code = NULL;
 	$r = defensio_post('get-stats', array('owner-url' => $defensio_conf['blog']), $err_code); 
@@ -634,7 +632,7 @@ function defensio_is_openid_enabled(){
 // the same comment.
 function defensio_get_openid($com){
 	global $wpdb;
-        
+
 	if (!defensio_is_openid_enabled())
 		return $com;
 
@@ -662,7 +660,7 @@ function defensio_check_comment($com, $incoming = true, $retrying = false) {
 	   get current user info, otherwise get the info from the 
 	   user who posted the comment 
 	*/
-	   
+
 	if ($incoming) {
 		$comment['referrer'] = $_SERVER['HTTP_REFERER'];
 		$comment['user-ip'] = preg_replace('/[^0-9., ]/', '', $_SERVER['REMOTE_ADDR']);
@@ -679,27 +677,26 @@ function defensio_check_comment($com, $incoming = true, $retrying = false) {
 			$comment['trusted-user'] = 'true';
 		}
 	}
-	
+
 	$comment['owner-url'] = $defensio_conf['blog'];
 
 	if (isset($com['comment_post_ID'])) {
 		$comment['article-date'] = strftime("%Y/%m/%d", strtotime($wpdb->get_var("SELECT post_date FROM $wpdb->posts WHERE ID=" . $com['comment_post_ID'])));
 		$comment['permalink'] = get_permalink($com['comment_post_ID']);
 	}
-  
+
 	$comment['comment-author'] = $com['comment_author'];
-  
+
 	if (!isset($com['comment_type']) or empty($com['comment_type'])) {
 		$comment['comment-type'] = 'comment';
 	} else {
 		$comment['comment-type'] = $com['comment_type'];
 	}
-  
+
 	// Make sure it we don't send an SQL escaped string to the server
 	$comment['comment-content'] = defensio_unescape_string($com['comment_content']);
 	$comment['comment-author-email'] = $com['comment_author_email'];
 	$comment['comment-author-url'] = $com['comment_author_url'];
-	
 
 	// If wp_openid is installed, use it
 	$comment['user_ID'] = $com['user_ID'];
@@ -709,13 +706,13 @@ function defensio_check_comment($com, $incoming = true, $retrying = false) {
 
 	if ($r = defensio_post('audit-comment', $comment, $err_code)) {
 		$ar = Spyc :: YAMLLoad($r);
-	
+
 		if (isset($ar['defensio-result'])) {
 			if ($ar['defensio-result']['status'] == DF_SUCCESS ) {
 				// Set metadata about the comment
 				$defensio_meta['spaminess'] = $ar['defensio-result']['spaminess'];
 				$defensio_meta['signature'] = $ar['defensio-result']['signature'];
-		
+
 				// Hook a function to store that metadata
 				add_action('comment_post', 'defensio_save_meta_data');
 		
@@ -727,7 +724,7 @@ function defensio_check_comment($com, $incoming = true, $retrying = false) {
 
 					// Get the difference in seconds from the article publication date until today
 					$time_diff = time() - strtotime($article->post_modified_gmt);
-		
+
 					// A day has 86400 seconds
 					if (get_option('defensio_delete_older_than') == 1 and ($time_diff > (get_option('defensio_delete_older_than_days') * 86400))) {
 						if ($incoming) {
@@ -743,7 +740,7 @@ function defensio_check_comment($com, $incoming = true, $retrying = false) {
 					}
 				}
 			}else{
-		        	// Successful http request, valid Defensio Result but Defensio failre
+				// Successful http request, valid Defensio Result but Defensio failre
 				if(!$retrying){
 					defensio_check_comment($com, $incoming, true) ;
 				 } else {
@@ -752,18 +749,18 @@ function defensio_check_comment($com, $incoming = true, $retrying = false) {
 				}
 			}
 		} else {
-	  		// Successful http request, but invalid Defensio result. Retry, once
+			// Successful http request, but invalid Defensio result. Retry, once
 			if(!$retrying){
 				defensio_check_comment($com, $incoming, true) ;
-		   	 } else {
+			 } else {
 				// Put comment in moderation queue.
 				defensio_send_to_moderation();
-		    	}
+			}
 		}
 	} else {
 		// Unsuccessful POST to the server. Defensio might be down.  Retry, once
 		if(!$retrying) {
-		    defensio_check_comment($com, $incoming, true) ;
+			 defensio_check_comment($com, $incoming, true) ;
 		// No luck... put comment in moderation queue
 		} else {
 			defensio_send_to_moderation();
@@ -843,14 +840,13 @@ function defensio_defer_training($id, $new_status = null) {
 	error_log($new_status); 
 	error_log($id); 
 
-  
 	// 'approve' should only be retrained when a message is being marked as SPAM
 	if (!(($new_status == 'approve' and $defensio_retraining) or $new_status == 'spam' or $new_status == null  )) {
 		return;
 	}
-		
+
 	$comment = $wpdb->get_row("SELECT * FROM $wpdb->comments NATURAL JOIN $wpdb->prefix" . "defensio WHERE $wpdb->comments.comment_ID = '$id'");
-  
+
 	if (!$comment) { return; }
 	if (!isset($comment->signature) or empty($comment->signature)) { return; }
 	
@@ -866,7 +862,7 @@ function defensio_defer_training($id, $new_status = null) {
 		  array_push($deferred_ham_to_spam, $comment->signature );
 		}
 	}
-  
+
 	if ($comment->comment_approved == 1) {
 		// Set new spaminess to 0%, it is ham for sure
 		$wpdb->get_row("UPDATE	$wpdb->prefix" . "defensio SET spaminess = 0 WHERE $wpdb->prefix"."defensio.comment_ID = '$id'");
@@ -971,7 +967,7 @@ add_filter('comment_spam_to_approved',  create_function('$comment', 'defensio_se
 function defensio_set_spaminess($comment_id, $value){
 	global $wpdb;
 	$wpdb->get_row("UPDATE	$wpdb->prefix" . 
-		       "defensio SET spaminess = " . 
+			"defensio SET spaminess = " . 
 			(string)$value  ." WHERE $wpdb->prefix".
 			"defensio.comment_ID = '$comment_id'"
 			);
@@ -982,7 +978,7 @@ function defensio_set_spaminess($comment_id, $value){
 
 function defensio_is_trusted_user($cap) {
 	global $defensio_trusted_roles;
-  
+
 	if (!is_array($cap)) { return false; }
 
 	foreach ($cap as $k => $v) {
@@ -1000,7 +996,7 @@ function defensio_get_signature($comment_id){
 
 function defensio_set_status_approved($id) {
 	global $defensio_retraining;
-	
+
 	// Human checked.. spaminess => 0 
 	defensio_set_spaminess($id, 0);
 	defensio_submit_ham(defensio_get_signature($id)); 
@@ -1038,7 +1034,7 @@ function defensio_reapply_wp_comment_preferences($comment_data) {
 		}
 	}
 
-	return $approved;	
+	return $approved;
 }
 
 
@@ -1194,8 +1190,6 @@ function defensio_user_unique_option_key( $opt_name = null ){
 		return "defensio_". $userdata->ID."_$opt_name";
 	}
 }
-
-
 
 function defensio_sort_by_to_sql($sort_by = null){
 	switch($sort_by){
