@@ -61,8 +61,6 @@ $defensio_retraining  = false;
 
 // Installation function, creates defensio table
 function defensio_install() {
-	global $wp_version;
-	
 	// Create table and set default options
 	defensio_create_table();
 	add_option(defensio_user_unique_option_key('threshold') , '80');
@@ -88,7 +86,7 @@ function defensio_create_table() {
 
 // Init hook
 function defensio_init() {
-	global $defensio_conf, $defensio_unprocessed_count, $wp_version;
+	global $defensio_conf, $defensio_unprocessed_count;
 	add_action('admin_menu', 'defensio_config_page');
 
 	if (isset ($defensio_conf['key'])) {
@@ -109,8 +107,8 @@ function defensio_init() {
 	}
 
 	// Enquque styles for 2.6 +
-	if ((float)$wp_version >= 2.6){
-		if((float)$wp_version >= 2.7){
+	if (defensio_wp_version() >= 2.6){
+		if(defensio_wp_version() >= 2.7){
 			wp_enqueue_style('defensio','/wp-content/plugins/defensio-anti-spam/styles/defensio_2.7.css' );
 		}else{
 			wp_enqueue_style('defensio' ,'/wp-content/plugins/defensio-anti-spam/styles/defensio.css' );
@@ -124,11 +122,11 @@ add_action('init', 'defensio_init');
 
 
 function defensio_key_not_set_warning() {
-	global $defensio_conf, $wp_version;
+	global $defensio_conf;
 	
 	if (!isset($defensio_conf['key']) or empty($defensio_conf['key'])) {
 		// No need in 2.7
-		if((float) $wp_version < 2.7)
+		if(defensio_wp_version() < 2.7)
 			defensio_render_warning_styles();
 		echo "<div id='defensio_warning' class='updated fade'>" .
 		"<p><strong>Defensio is not active</strong> because you have not entered your Defensio API key.  <a href='http://defensio.com/signup' target='_blank'>Get one right here!</a></p></div>";
@@ -467,14 +465,14 @@ function defensio_caught( $opts = null ) {
 }
 
 function defensio_dispatch(){
-	global $wpdb, $defensio_conf, $defensio_retraining, $wp_version;
+	global $wpdb, $defensio_conf, $defensio_retraining;
 
 	if (function_exists('current_user_can') && !current_user_can('moderate_comments')) {
 		die(__('You do not have sufficient permission to moderate comments.'));
 	}
 
 	// Perform requested actions old versions
-	if($wp_version < 2.7){
+	if(defensio_wp_version() < 2.7){
 		$db_req = array( 
 				'defensio_comments' => $_POST['defensio_comments'],  
 				'defensio_empty_quarantine' =>  $_POST['defensio_empty_quarantine'],  
@@ -540,7 +538,7 @@ function defensio_manage_page() {
 add_action('admin_menu', 'defensio_manage_page');
 
 function defensio_admin_head(){
-	global $plugin_uri, $wp_version;
+	global $plugin_uri;
 	wp_enqueue_script('prototype');
 	wp_enqueue_script('fat',  '/wp-content/plugins/defensio-anti-spam/scripts/fat.js');
 	wp_enqueue_script('defensio', '/wp-content/plugins/defensio-anti-spam/scripts/defensio.js');
@@ -1203,7 +1201,7 @@ function defensio_sort_by_to_sql($sort_by = null){
 }
 
 // Only 2.7
-if ((float)$wp_version >= 2.7 ){
+if (defensio_wp_version() >= 2.7 ){
 	add_filter('comment_status_links', 'defensio_replace_default_quarantine_link', 99, 1);
 
 	/* In WP 2.7 there is a built-in  SPAM quarantine. This filter function
@@ -1211,7 +1209,6 @@ if ((float)$wp_version >= 2.7 ){
 	* link to spam type by a link to defensio's quarantine
 	*/
 	function defensio_replace_default_quarantine_link($status_links){
-		global $wp_version;
 
 		foreach($status_links as $index => $link){
 

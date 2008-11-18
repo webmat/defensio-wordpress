@@ -68,4 +68,19 @@ function is_new_gen_wordpress() {
 		return $wp_version >= 2.5;
 }
 
+// Replaces multiple checks for MU and standard WP.
+// It will return 2.x versions for any wp version, since
+// 2.3 and 1.3Mu share code they will be seen as 2.3 and so on
+function defensio_wp_version(){
+	global $wp_version;
+	$version = (float)$wp_version;
+
+	if(is_mu() and $version < 1.5){
+		return $version + 1;
+	} else {
+		return $version;
+	}
+
+}
+
 ?>
