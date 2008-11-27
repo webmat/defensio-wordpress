@@ -524,7 +524,12 @@ function defensio_manage_page() {
 
 	$spaminess_filter = defensio_generate_spaminess_filter();
 	$spam_count = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->comments LEFT JOIN $wpdb->prefix" . "defensio ON $wpdb->comments" . ".comment_ID = $wpdb->prefix" . "defensio.comment_ID  WHERE comment_approved = 'spam' $spaminess_filter ");
-        $page = NULL;
+	$page = NULL;
+	
+	// In 2.7 + force the submenu.
+	if(defensio_wp_version() >= 2.7 && !isset($submenu['edit-comments.php']))
+		$submenu['edit-comments.php'] = array();
+
 	if (isset($submenu['edit-comments.php'])) {
 		$page = add_submenu_page('edit-comments.php', 'Defensio Spam', "Defensio Spam ($spam_count)", 'moderate_comments', __FILE__, 'defensio_dispatch');
 	}
@@ -1221,7 +1226,7 @@ if (defensio_wp_version() >= 2.7 ){
 		return $status_links;
 	}
 	
-	/* Redirect default quarantine to defensio's. There is no useful hook to cahnge the
+	/* Redirect default quarantine to defensio's. There is no useful hook to change the
 	  link in dashboard.php... just redirect */	
 	add_action('load-edit-comments.php', 'defensio_redirect_to_qurantine');
 
