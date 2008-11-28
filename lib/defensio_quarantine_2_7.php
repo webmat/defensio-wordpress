@@ -60,7 +60,7 @@ function defensio_render_subsubsub() { ?>
 	$status_links = array();
 	$num_comments = wp_count_comments();
 	$stati = array(
-	                'moderated' => sprintf(__ngettext('Awaiting Moderation (%s)', 'Awaiting Moderation (%s)', number_format_i18n($num_comments->moderated) ), "<span class='comment-count'>" . number_format_i18n($num_comments->moderated) . "</span>"),
+	                'moderated' => sprintf(__ngettext('Pending (%s)', 'Pending (%s)', number_format_i18n($num_comments->moderated) ), "<span class='comment-count'>" . number_format_i18n($num_comments->moderated) . "</span>"),
 	                'approved' => _c('Approved|plural'),
 	                'spam' => sprintf(__ngettext('Spam (%s)', 'Spam (%s)', number_format_i18n($num_comments->spam) ), "<span class='spam-comment-count'>" . number_format_i18n($num_comments->spam) . "</span>")
 	        );
@@ -102,7 +102,6 @@ function defensio_render_navigation_bar($v, $position) {
 	$start = $offset = ( $page - 1 ) * $comments_per_page;
 	
 	$page_links = defensio_page_navigation_links($v);
-	error_log($page_links);
 	// TODO: make page links work.  See edit-comment.php around line 169
 ////////$page_links = paginate_links( array(
 ////////        'base' => add_query_arg( 'apage', '%#%' ),
@@ -184,10 +183,11 @@ TODO: update page links
 
 function defensio_wp_comment_row( $c, $mode, $checkbox = true) {
         global $comment, $post;
-				$comment = $c;
-				$spaminess_class = defensio_class_for_spaminess($comment->spaminess);
+	$comment = $c;
+	$spaminess_class = defensio_class_for_spaminess($comment->spaminess);
         $post = get_post($comment->comment_post_ID);
         $authordata = get_userdata($post->post_author);
+	
 
         if ( current_user_can( 'edit_post', $post->ID ) ) {
                 $post_link = "<a href='" . get_edit_post_link($post->ID) . "'>";
@@ -215,7 +215,8 @@ function defensio_wp_comment_row( $c, $mode, $checkbox = true) {
         $spam_url = clean_url( wp_nonce_url( "comment.php?action=deletecomment&dt=spam&p=$comment->comment_post_ID&c=$comment->comment_ID", "delete-comment_$comment->comment_ID" ) );
 
         echo "<tr id='comment-$comment->comment_ID' class='spam $spaminess_class'>";
-        $columns = get_column_headers('comment');
+        $columns = get_column_headers('edit-comments');
+        
         $hidden = (array) get_user_option( 'manage-comment-columns-hidden' );
         foreach ( $columns as $column_name => $column_display_name ) {
                 $class = "class=\"$column_name column-$column_name\"";
@@ -359,7 +360,6 @@ function defensio_render_group_header($title) {
 
 function defensio_render_spam_list_sorted_by_spaminess($v) {
 	$current_group = NULL;
-	
 	foreach($v['comments'] as $spam_comment) {
 		if ($current_group != defensio_spaminess_level($spam_comment->spaminess)) {
 			$current_group = defensio_spaminess_level($spam_comment->spaminess);

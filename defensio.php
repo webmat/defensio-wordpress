@@ -496,9 +496,8 @@ function defensio_dispatch(){
 		$db_req['ham'] = $_POST['ham'];
 
 	defensio_update_db($db_req);
-
+	
 	/* Query for comments */
-
 	$query_opts = array(
 			'items_per_page' => 50,
  			'page' => $_GET['defensio_page'],
@@ -520,23 +519,22 @@ function defensio_dispatch(){
 }
 
 function defensio_manage_page() {
-	global $wpdb, $submenu, $defensio_conf;
+	global $wpdb, $submenu, $menu, $defensio_conf;
 
 	$spaminess_filter = defensio_generate_spaminess_filter();
 	$spam_count = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->comments LEFT JOIN $wpdb->prefix" . "defensio ON $wpdb->comments" . ".comment_ID = $wpdb->prefix" . "defensio.comment_ID  WHERE comment_approved = 'spam' $spaminess_filter ");
 	$page = NULL;
 	
-	// In 2.7 + force the submenu.
-	if(defensio_wp_version() >= 2.7 && !isset($submenu['edit-comments.php']))
-		$submenu['edit-comments.php'] = array();
+	if (defensio_wp_version() >= 2.7 ){
+		$page = add_comments_page('Defensio Spam', "Defensio Spam ($spam_count)", 'moderate_comments', 'defensio-quarantine', 'defensio_dispatch');
 
-	if (isset($submenu['edit-comments.php'])) {
+	} elseif (isset($submenu['edit-comments.php'])   ) {
 		$page = add_submenu_page('edit-comments.php', 'Defensio Spam', "Defensio Spam ($spam_count)", 'moderate_comments', __FILE__, 'defensio_dispatch');
-	}
-	elseif (function_exists('add_management_page')) {
+	} elseif (function_exists('add_management_page')) {
 		$page = add_management_page('Defensio Spam', "Defensio Spam ($spam_count)", 'moderate_comments', 'defensio-admin', 'defensio_dispatch');
 	}
-	if($page){
+
+	if ($page){
 		add_action( "admin_print_scripts-$page", 'defensio_admin_head' );
 	}
 }
@@ -840,9 +838,6 @@ function defensio_submit_spam($signatures){
 function defensio_defer_training($id, $new_status = null) {
 	global $deferred_spam_to_ham, $deferred_ham_to_spam, $defensio_retraining, $wpdb;
 	
-	error_log($new_status); 
-	error_log($id); 
-
 	// 'approve' should only be retrained when a message is being marked as SPAM
 	if (!(($new_status == 'approve' and $defensio_retraining) or $new_status == 'spam' or $new_status == null  )) {
 		return;
@@ -1219,7 +1214,7 @@ if (defensio_wp_version() >= 2.7 ){
 
 			if(preg_match('/Spam/', $link)){
 				//TODO: Use appropiate constant plugin_name
-				$status_links[$index] = '<a href="edit-comments.php?page=defensio-anti-spam/defensio.php">Defensio Spam ('. defensio_spam_count() . ") </a> ";
+				$status_links[$index] = '<a href="edit-comments.php?page=defensio-quarantine">Defensio Spam ('. defensio_spam_count() . ") </a> ";
 				break;
 			}	
 		}
@@ -1232,7 +1227,7 @@ if (defensio_wp_version() >= 2.7 ){
 
 	function defensio_redirect_to_qurantine($a){
 		if($_REQUEST['comment_status'] == 'spam')
-			wp_redirect("edit-comments.php?page=defensio-anti-spam/defensio.php");
+			wp_redirect("edit-comments.php?page=defensio-quarantine");
 	}
 }
 
