@@ -216,6 +216,7 @@ function defensio_wp_comment_row( $c, $mode, $checkbox = true) {
 
         echo "<tr id='comment-$comment->comment_ID' class='spam $spaminess_class'>";
         $columns = get_column_headers('edit-comments');
+	error_log(print_r($columns, true));
         
         $hidden = (array) get_user_option( 'manage-comment-columns-hidden' );
         foreach ( $columns as $column_name => $column_display_name ) {
@@ -235,7 +236,14 @@ function defensio_wp_comment_row( $c, $mode, $checkbox = true) {
                                 echo '</th>';
                                 break;
                         case 'comment':
-                                echo "<td $attributes>"; ?>
+                                echo "<td $attributes>"; 
+
+				echo '<div id="submitted-on">';
+				printf(__('Submitted on <a href="%1$s">%2$s at %3$s</a>'), get_comment_link($comment->comment_ID), get_comment_date(__('Y/m/d')), get_comment_date(__('g:ia')));
+				echo '</div>';
+
+
+?>
 																
 																<p class="defensio_body_shrunk" id="<?php echo "defensio_body_" . $comment->id; ?>">
 																	<?php echo ($comment->comment_content) ?>
@@ -261,6 +269,7 @@ function defensio_wp_comment_row( $c, $mode, $checkbox = true) {
 																				$actions['details'] = "<span id='defensio_more_details_" . $comment->id . "' class='defensio_more_details'><a href='#' onclick=\"javascript:$('defensio_more_details_" . $comment->id . "').removeClassName('defensio_more_details').update('Signature: $comment->signature | Spaminess: " . number_format($comment->spaminess * 100, 0) . "%');return false;\">Details</a></span>";
                                         $actions = apply_filters( 'comment_row_actions', $actions, $comment );
 
+					echo "<div class=\"row-actions\">";
                                         $i = 0;
                                         foreach ( $actions as $action => $link ) {
                                                 ++$i;
@@ -269,9 +278,9 @@ function defensio_wp_comment_row( $c, $mode, $checkbox = true) {
                                                 // Reply and quickedit need a hide-if-no-js span
                                                 if ( 'reply' == $action || 'quickedit' == $action )
                                                         $action .= ' hide-if-no-js';
-
-                                                echo "<span class='$action'>$sep$link</span>";
+	                                                echo "<span class='$action'>$sep$link</span>";
                                         }
+					echo "</div>";
                                 }
 
                                 echo '</td>';
@@ -325,23 +334,21 @@ function defensio_render_spam_list($v) {
 	
 	$function_name  = "defensio_render_spam_list_sorted_by_" . $order ; 
 	?>
-	<table class="widefat">
+	<table class="widefat fixed">
 		<thead>
 			<tr>
 				<th id="cb" class="manage-column column-cb check-column" style="" scope="col"><input type="checkbox"/></th>
-				<th id="comment" class="manage-column column-comment" style="" scope="col">Comment</th>
 				<th id="author" class="manage-column column-author" style="" scope="col">Author</th>
-				<th id="date" class="manage-column column-date" style="" scope="col">Submitted</th>
-				<th id="response" class="manage-column column-response" style="" scope="col">In Response To This Post</th>
+				<th id="comment" class="manage-column column-comment" style="" scope="col">Comment</th>
+				<th id="response" class="manage-column column-response" style="" scope="col">In Response To</th>
 			</tr>
 		</thead>
 		<tfoot>
 			<tr>
 				<th class="manage-column column-cb check-column" style="" scope="col"><input type="checkbox"/></th>
-				<th class="manage-column column-comment" style="" scope="col">Comment</th>
 				<th class="manage-column column-author" style="" scope="col">Author</th>
-				<th class="manage-column column-date" style="" scope="col">Submitted</th>
-				<th class="manage-column column-response" style="" scope="col">In Response To This Post</th>
+				<th class="manage-column column-comment" style="" scope="col">Comment</th>
+				<th class="manage-column column-date" style="" scope="col">In Response To</th>
 			</tr>
 		</tfoot>
 		
@@ -355,7 +362,7 @@ function defensio_render_spam_list($v) {
 
 function defensio_render_group_header($title) {
 	//echo "<li><ul class='defensio_comment_group'><li class='defensio_post_title'>  $title </li>";
-	echo "<tr class='defensio_comment_group'><td colspan=5>$title</td></tr>";
+	echo "<tr class='defensio_comment_group'><td colspan=4>$title</td></tr>";
 }
 
 function defensio_render_spam_list_sorted_by_spaminess($v) {
