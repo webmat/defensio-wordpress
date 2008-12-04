@@ -1,10 +1,3 @@
-/* Default defensio style
- *
- * style tweaks should be added in separate style sheets
- * for a given  WP version
- *
- *  */
-
 ul.defensio_comments {
   list-style: none;
   padding: 0;

@@ -106,15 +106,15 @@ function defensio_init() {
 		add_action('admin_notices', 'defensio_unprocessed_warning');
 	}
 
-	// Enquque styles for 2.6 +
-	if (defensio_wp_version() >= 2.6){
-		if(defensio_wp_version() >= 2.7){
+	// Enqueue styles for 2.6+
+	if (defensio_wp_version() >= 2.6) {
+		if(defensio_wp_version() >= 2.7) {
 			wp_enqueue_style('defensio','/wp-content/plugins/defensio-anti-spam/styles/defensio_2.7.css' );
-		}else{
+		} else {
 			wp_enqueue_style('defensio' ,'/wp-content/plugins/defensio-anti-spam/styles/defensio.css' );
 		}
-	}else{
-		//Here for older versions
+	} else {
+		// for older versions
 		add_action('admin_head', create_function('$a', 'echo "<link media=\"all\" type=\"text/css\" href=\"'. get_option('siteurl')  .'/wp-content/plugins/defensio-anti-spam/styles/defensio.css\" rel=\"stylesheet\"> </link>" ;'));
 	}	
 }
@@ -500,7 +500,7 @@ function defensio_dispatch(){
 	/* Query for comments */
 	$query_opts = array(
 			'items_per_page' => 50,
- 			'page' => $_GET['defensio_page'],
+			'page' => $_GET['defensio_page'],
 			'sort_by' => $_REQUEST['sort_by'],
 			'hide_obvious_spam_toggle' => $_REQUEST['hide_obvious_spam_toggle'],
 			'hide_obvious_spam' => $_REQUEST['hide_obvious_spam'],
