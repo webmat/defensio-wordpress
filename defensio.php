@@ -1212,7 +1212,6 @@ if (defensio_wp_version() >= 2.7 ){
 		foreach($status_links as $index => $link){
 
 			if(preg_match('/Spam/', $link)){
-				//TODO: Use appropiate constant plugin_name
 				$status_links[$index] = '<a href="edit-comments.php?page=defensio-quarantine">Defensio Spam ('. defensio_spam_count() . ") </a> ";
 				break;
 			}	
