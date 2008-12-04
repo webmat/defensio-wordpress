@@ -529,7 +529,7 @@ function defensio_manage_page() {
 		$page = add_comments_page('Defensio Spam', "Defensio Spam ($spam_count)", 'moderate_comments', 'defensio-quarantine', 'defensio_dispatch');
 
 	} elseif (isset($submenu['edit-comments.php'])   ) {
-		$page = add_submenu_page('edit-comments.php', 'Defensio Spam', "Defensio Spam ($spam_count)", 'moderate_comments', __FILE__, 'defensio_dispatch');
+		$page = add_submenu_page('edit-comments.php', 'Defensio Spam', "Defensio Spam ($spam_count)", 'moderate_comments', 'defensio-quarantine', 'defensio_dispatch');
 	} elseif (function_exists('add_management_page')) {
 		$page = add_management_page('Defensio Spam', "Defensio Spam ($spam_count)", 'moderate_comments', 'defensio-admin', 'defensio_dispatch');
 	}
@@ -1129,9 +1129,8 @@ function defensio_obvious_spam_count() {
 }
 
 function defensio_render_activity_box() {
-	global $plugin_name;
 	$link_base = 'edit-comments.php';
-	$link = clean_url($link_base . "?page=$plugin_name/defensio.php");
+	$link = clean_url($link_base . "?page=defensio-quarantine.php");
 
 	$obvious_spam_count = defensio_obvious_spam_count();
 	$total_spam_count = defensio_spam_count();
