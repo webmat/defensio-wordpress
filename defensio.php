@@ -116,7 +116,7 @@ function defensio_init() {
 	} else {
 		// for older versions
 		add_action('admin_head', create_function('$a', 'echo "<link media=\"all\" type=\"text/css\" href=\"'. get_option('siteurl')  .'/wp-content/plugins/defensio-anti-spam/styles/defensio.css\" rel=\"stylesheet\"> </link>" ;'));
-	}	
+	}
 }
 add_action('init', 'defensio_init');
 
@@ -156,10 +156,10 @@ function defensio_collect_signatures($s) {
 }
 
 // Shutdown hook
+// Train comments scheduled to be trained, in only one request to defensio server.
 function defensio_finalize() {
 	global $deferred_ham_to_spam, $deferred_spam_to_ham ;
 
-	// Train comments scheduled to be trained
 	if (!empty($deferred_ham_to_spam)) {
 		defensio_submit_spam(defensio_collect_signatures($deferred_ham_to_spam));
 	}
@@ -579,7 +579,7 @@ function defensio_update_meta_data($comment_ID) {
 	// Update Defensio record
 	if (isset($meta['spaminess']) and isset($meta['signature'])) {
 		$wpdb->query("UPDATE  $wpdb->prefix" . "defensio set spaminess =  ". $meta['spaminess'] . " , signature =	'" . $meta['signature'] . "' WHERE comment_ID = $comment_ID ");
-		
+
 		// If this is an ajax call put spam in the quarantine since hooks wont run
 		if (defined('DEFENSIO_AJAX') and isset($defensio_meta['spam']) and $defensio_meta['spam'] == true) {
 			$wpdb->query("UPDATE $wpdb->comments set comment_approved = 'spam' WHERE comment_ID = $comment_ID ");
@@ -603,7 +603,7 @@ function defensio_get_stats() {
 	return $stats;
 }
 
-// refresh stats from server
+// Refresh stats from server
 function defensio_refresh_stats() {
 	global $defensio_conf;
 	$err_code = NULL;
@@ -961,7 +961,6 @@ add_action('wp_ajax_defensio-restore', 'defensio_restore');
 add_filter('comment_spam_to_approved',  create_function('$comment', 'defensio_set_status_approved($comment->comment_ID);'));
 
 // Sets the spamines value for a comment already in the db
-
 function defensio_set_spaminess($comment_id, $value){
 	global $wpdb;
 	$wpdb->get_row("UPDATE	$wpdb->prefix" . 
@@ -970,9 +969,6 @@ function defensio_set_spaminess($comment_id, $value){
 			"defensio.comment_ID = '$comment_id'"
 			);
 }
-
-
-
 
 function defensio_is_trusted_user($cap) {
 	global $defensio_trusted_roles;
@@ -985,7 +981,6 @@ function defensio_is_trusted_user($cap) {
 
 	return false;
 }
-
 
 function defensio_get_signature($comment_id){
 	global $wpdb, $defensio_conf;
@@ -1035,11 +1030,9 @@ function defensio_reapply_wp_comment_preferences($comment_data) {
 	return $approved;
 }
 
-
 function defensio_unescape_string($str) {
 	return stripslashes($str);
 }
-
 
 function defensio_counter($color='dark', $align='left') {
 	global $plugin_uri;
@@ -1159,7 +1152,6 @@ function defensio_render_activity_box() {
 	echo "</p>";
 }
 add_action('activity_box_end', 'defensio_render_activity_box');
-// Try to remplace dashboard link!
 
 // Orphan rows have spaminess -1; they were never filtered by Defensio
 function defensio_clean_up_orphan_rows($id, $status) {
@@ -1219,8 +1211,8 @@ if (defensio_wp_version() >= 2.7 ){
 		return $status_links;
 	}
 	
-	/* Redirect default quarantine to defensio's. There is no useful hook to change the
-	  link in dashboard.php... just redirect */	
+	// Redirect default quarantine to defensio's. There is no useful hook to change the
+	// link in dashboard.php... just redirect 
 	add_action('load-edit-comments.php', 'defensio_redirect_to_qurantine');
 
 	function defensio_redirect_to_qurantine($a){
