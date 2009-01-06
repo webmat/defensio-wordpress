@@ -121,7 +121,7 @@ function defensio_styles() {
 		wp_enqueue_style('defensio', '/wp-content/plugins/defensio-anti-spam/styles/defensio.css' );
 	}
 }
-add_action('admin_print_styles', 'defensio_syles');
+add_action('admin_print_styles', 'defensio_styles');
 
 function defensio_key_not_set_warning() {
 	global $defensio_conf;
