@@ -648,7 +648,7 @@ function defensio_get_openid($com){
 			$identity = @array_pop($identity);
 		}
 		$com['openid'] = $identity;
-	} elseif(finish_openid_auth()) {
+	} elseif(function_exists('finish_openid_auth')) {
 		$com['openid'] = finish_openid_auth();
 		// Not really logged in but a valid openid
 		$com['user-logged-in'] = 'true';
