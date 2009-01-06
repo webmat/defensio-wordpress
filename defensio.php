@@ -280,11 +280,13 @@ function defensio_generate_spaminess_filter($reverse = false, $ignore_option = f
 		   for this problem.  new users have their spaminess properly stored as numeric.
 		   this hack will, not affect them, however. */
 		$t = $t - 0.001;
-
+		
+		// MySQL does not like "," as decimal separator using sprintf to avoid that in 
+		// some locales.
 		if ($reverse) {
-			$spaminess_filter = " AND IFNULL(spaminess, 1) >= $t";
+			$spaminess_filter = " AND IFNULL(spaminess, 1) >= ". sprintf('%F', $t);
 		} else {
-			$spaminess_filter = " AND IFNULL(spaminess, 1) < $t";
+			$spaminess_filter = " AND IFNULL(spaminess, 1) < " . sprintf('%F', $t);
 		}
 	}
 
