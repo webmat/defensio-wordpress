@@ -530,7 +530,8 @@ function defensio_manage_page() {
 	$page = NULL;
 	
 	if (defensio_wp_version() >= 2.7 ){
-		$page = add_comments_page('Defensio Spam', "Defensio Spam ($spam_count)", 'moderate_comments', 'defensio-quarantine', 'defensio_dispatch');
+		$count_html =  "<span id=\"awaiting-mod\" class=\"count-1\"><span class=\"pending-count\">$spam_count</span> </span>";
+		$page = add_comments_page('Defensio Spam', "Defensio Spam $count_html", 'moderate_comments', 'defensio-quarantine', 'defensio_dispatch');
 
 	} elseif (isset($submenu['edit-comments.php'])   ) {
 		$page = add_submenu_page('edit-comments.php', 'Defensio Spam', "Defensio Spam ($spam_count)", 'moderate_comments', 'defensio-quarantine', 'defensio_dispatch');
